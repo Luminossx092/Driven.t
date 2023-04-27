@@ -33,6 +33,19 @@ async function createBooking(userId: number, roomId: number): Promise<Booking> {
   return booking;
 }
 
-const bookingsServices = { getBookingById, createBooking };
+async function updateBooking(userId: number, roomId: number, bookingId: number) {
+  const room = await roomsRepository.findRoomById(roomId);
+  if (!room) throw notFoundError();
+
+  if (room.capacity <= room.Booking.length) throw forbiddenError('Room is full');
+
+  const booking = await bookingsRepository.findBookingById(userId);
+  if (!booking) throw forbiddenError('No booking for user');
+
+  const response = await bookingsRepository.update(roomId, bookingId);
+  return response;
+}
+
+const bookingsServices = { getBookingById, createBooking, updateBooking };
 
 export default bookingsServices;
