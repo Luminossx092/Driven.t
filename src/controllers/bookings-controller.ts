@@ -18,14 +18,13 @@ export async function getBookingById(req: AuthenticatedRequest, res: Response) {
 }
 
 export async function createBooking(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const body = req.body as Pick<Room, 'id'>;
+  const { roomId } = req.body as { roomId: number };
   const { userId } = req;
   try {
-    if (!body) return res.sendStatus(httpStatus.UNPROCESSABLE_ENTITY);
+    if (!roomId) return res.sendStatus(httpStatus.UNPROCESSABLE_ENTITY);
 
-    const booking = await bookingsServices.createBooking(userId, body.id);
-
-    return res.status(httpStatus.OK).send(booking.id);
+    const booking = await bookingsServices.createBooking(userId, roomId);
+    return res.status(httpStatus.OK).send({ id: booking.id });
   } catch (error) {
     next(error);
   }

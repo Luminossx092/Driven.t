@@ -20,6 +20,9 @@ import app, { init } from '@/app';
 
 beforeAll(async () => {
   await init();
+});
+
+beforeEach(async () => {
   await cleanDb();
 });
 
@@ -108,12 +111,16 @@ describe('POST /Booking ', () => {
 
       const hotel = await createHotel();
       const room = await createRoomWithHotelId(hotel.id);
-      const booking = await createBooking(user.id, room.id);
+
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketTypeWithHotel();
+      const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+      await createPayment(ticket.id, ticketType.price);
 
       const response = await server.post('/booking').set('Authorization', `Bearer ${token}`).send({ roomId: room.id });
       expect(response.statusCode).toBe(httpStatus.OK);
       expect(response.body).toEqual({
-        id: booking.id,
+        id: expect.any(Number),
       });
     });
 
